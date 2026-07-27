@@ -1,0 +1,88 @@
+name: Public record audit
+
+# This README is the first thing anyone reads about me and the last thing I
+# remember to update. On a schedule this re-verifies every claim in claims.json
+# against a live source — GitHub issue/PR state, the npm registry, HTTP
+# reachability — and runs each result through a typed policy gate.
+#
+# A BLOCKED claim is an honesty violation that must be fixed (the run exits
+# non-zero). A claim needing review is the world having moved underneath a
+# published statement — a PR merged, a package unpublished, a link rotted.
+# Either way it opens a PR for a human: propose, never publish. The auditor
+# never edits the README.
+#
+# Ported from axiom-orion/cason-heritage, where this is the fourteenth agent
+# in a governed roster. Same gate, same trace, different corpus.
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'        # Mondays 11:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: claim-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit the public record
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Skip if an audit PR is already open
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh pr list --state open --search 'Public record audit in:title' --json number --jq 'length')
+          echo "open=$open" >> "$GITHUB_OUTPUT"
+          if [ "$open" != "0" ]; then echo "An audit PR is already open — skipping this run."; fi
+
+      - name: Run the auditor
+        id: audit
+        if: steps.guard.outputs.open == '0'
+        env:
+          # Lifts the anonymous GitHub API rate limit for the issue/PR verifiers.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          node .agents/claim-audit.js
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Open a report PR on a blocked or drifted claim
+        if: steps.guard.outputs.open == '0'
+        env:
+          GH_TOKEN: ${{ secrets.KEEPER_PAT || github.token }}
+        run: |
+          if [ -z "$(git status --porcelain .agents/reports)" ]; then
+            echo "Every claim verified clean — nothing to report."
+            exit ${{ steps.audit.outputs.code }}
+          fi
+          date=$(date -u +%Y-%m-%d)
+          branch="claims/audit-${{ github.run_id }}"
+          git config user.name  'claim-auditor[bot]'
+          git config user.email 'claim-auditor@users.noreply.github.com'
+          git checkout -b "$branch"
+          git add .agents/reports
+          git commit -m "Public record audit $date"
+          git push -u origin "$branch"
+          flag=""
+          if [ "${{ steps.audit.outputs.code }}" != "0" ]; then flag=" — ⛔ BLOCKED CLAIM"; fi
+          if gh pr create \
+            --title "Public record audit: $date$flag" \
+            --body $'The profile README audited itself against live sources.\n\nA **blocked** claim is an honesty violation — an unsourced metric, or a claim the README no longer carries. A claim **needing review** is the world having moved: a PR merged, a link died, an attestation expired.\n\nReview, then update `README.md` and `claims.json` together. The auditor never edits the README.\n\nSee `.agents/README.md`.' \
+            --base main --head "$branch"; then
+            echo "Opened report PR from $branch."
+          else
+            echo "::warning::Could not open the PR automatically. The report is on branch '$branch' — open a PR from it manually. Check Settings → Actions → General → 'Allow GitHub Actions to create and approve pull requests'."
+          fi
+          exit ${{ steps.audit.outputs.code }}

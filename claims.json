@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "subject": "Ryan Cason — GitHub profile README",
+  "note": "The claims manifest this repo's Public Record Auditor governs. Ported from axiom-orion/cason-heritage; the agent is generic, this file is what makes it about this surface. A profile README is the first thing anyone reads about you and the last thing anyone updates — every claim in it that can go stale is registered here with the source that backs it.",
+
+  "publicArtifacts": ["README.md"],
+  "attestationMaxAgeDays": 180,
+
+  "claims": [
+    {
+      "id": "livekit-pr-6474",
+      "claimKind": "status",
+      "visibility": "public",
+      "text": "PR [#6474](https://github.com/livekit/agents/pull/6474)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "github-issue-state", "repo": "livekit/agents", "number": 6474, "expect": "open" },
+      "note": "The most volatile claim on this page, and the reason this auditor was ported here first. It is listed under 'Recent OSS' — the moment it merges or closes, the framing is stale. The same claim appears on flcason.com/resume and is governed there too."
+    },
+    {
+      "id": "livekit-issue-6473",
+      "claimKind": "status",
+      "visibility": "public",
+      "text": "issue [#6473](https://github.com/livekit/agents/issues/6473)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "github-issue-state", "repo": "livekit/agents", "number": 6473, "expect": "open" }
+    },
+    {
+      "id": "stt-plugin-count",
+      "claimKind": "metric",
+      "visibility": "public",
+      "text": "7 STT plugins",
+      "appearsIn": ["README.md"],
+      "verify": {
+        "method": "attested",
+        "source": "The diff of livekit/agents PR #6474 itself — the send-side reconnect fix spans seven speech-to-text provider plugins. Countable from the PR's changed files.",
+        "asOf": "2026-07-27"
+      },
+      "note": "A number, so the gate requires a receipt. The receipt is the PR diff. If the PR's scope changes during review, this count changes with it — which is exactly what the 180-day attestation expiry is for."
+    },
+    {
+      "id": "npm-vorionsys-published",
+      "claimKind": "status",
+      "visibility": "public",
+      "text": "`@vorionsys/*` on npm",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "npm-package", "package": "@vorionsys/basis-spec" },
+      "note": "Spot-check that the @vorionsys npm line is real. basis-spec, NOT basis — the latter was withdrawn, and a claim pointing at it would be checking a package that no longer exists."
+    },
+    {
+      "id": "org-axiom-orion",
+      "claimKind": "link",
+      "visibility": "public",
+      "text": "[github.com/axiom-orion](https://github.com/axiom-orion)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "http-ok", "url": "https://github.com/axiom-orion" }
+    },
+    {
+      "id": "org-vorionsys",
+      "claimKind": "link",
+      "visibility": "public",
+      "text": "[github.com/vorionsys](https://github.com/vorionsys)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "http-ok", "url": "https://github.com/vorionsys" }
+    },
+    {
+      "id": "site-vorion",
+      "claimKind": "link",
+      "visibility": "public",
+      "text": "[Vorion](https://vorion.org)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "http-ok", "url": "https://vorion.org" }
+    },
+    {
+      "id": "vorionsys-license",
+      "claimKind": "status",
+      "visibility": "public",
+      "text": "Apache-2.0",
+      "appearsIn": ["README.md"],
+      "verify": {
+        "method": "attested",
+        "source": "The published @vorionsys packages carry Apache-2.0 in their package.json license field. Note this does NOT extend to every Vorion repo — vorion-find is deliberately proprietary — so the claim is scoped to the @vorionsys npm packages, which is how the README words it.",
+        "asOf": "2026-07-27"
+      }
+    },
+    {
+      "id": "role-vorion",
+      "claimKind": "narrative",
+      "visibility": "public",
+      "text": "**Co-Founder**, [Vorion](https://vorion.org)",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "unverified" },
+      "basis": "Founding role at Vorion from January 2026.",
+      "note": "INCONSISTENT ACROSS SURFACES — needs a decision, not a code fix. This README and flcason.com/resume's Vorion section both say 'Co-Founder', but that résumé's own headline says 'Founder, Vorion'. Two of three say Co-Founder. Pick one and make all three match; a role title that contradicts itself on the same page is the kind of thing a reader notices before anything else on it."
+    },
+    {
+      "id": "role-banquetai",
+      "claimKind": "narrative",
+      "visibility": "public",
+      "text": "**Founder**, BanquetAI",
+      "appearsIn": ["README.md"],
+      "verify": { "method": "unverified" },
+      "basis": "Sole founder of BanquetAI, begun 2025. Consistent with flcason.com/resume, which titles the role 'Founder & Engineer · 2025–present'."
+    }
+  ]
+}
